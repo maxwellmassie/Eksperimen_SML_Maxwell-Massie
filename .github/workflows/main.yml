@@ -39,8 +39,8 @@ jobs:
       - name: Commit and push preprocessed CSV
         run: |
           # Set author commit
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "Maxwell Massie"
+          git config --global user.email "goldsteinmaxwellmassie@gmail.com"
 
           # Tambahkan file CSV preprocessing
           git add preprocessing/auto-mpg_preprocessed.csv
