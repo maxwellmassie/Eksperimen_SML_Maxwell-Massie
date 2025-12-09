@@ -1,4 +1,4 @@
-name: Preprocess Auto-MPG Dataset
+name: Preprocess and Push Auto-MPG Dataset
 
 on:
   push:
@@ -10,23 +10,43 @@ jobs:
   preprocess:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    permissions:
+      contents: write  # agar GITHUB_TOKEN bisa push
 
-      - name: Set up Python
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12.7'
 
+      # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pandas scikit-learn
+      # Jalankan preprocessing
       - name: Run preprocessing
         run: |
           python preprocessing/automate_maxwell-massie.py
-      - name: Upload preprocessed dataset
+      # Commit & push hasil preprocessing ke repo
+      - name: Commit and push preprocessed CSV
+        run: |
+          # Set author commit
+          git config --global user.name "Maxwell Massie"
+          git config --global user.email "goldsteinmaxwellmassie@gmail.com"
+          # Tambahkan file CSV preprocessing
+          git add preprocessing/auto-mpg_preprocessed.csv
+          # Commit jika ada perubahan
+          git commit -m "Update auto-mpg_preprocessed.csv" || echo "No changes to commit"
+          # Push menggunakan GITHUB_TOKEN
+          git push https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+      # Upload hasil preprocessing sebagai artifact (opsional)
+      - name: Upload preprocessed CSV as artifact
         uses: actions/upload-artifact@v4
         with:
           name: auto-mpg_preprocessed
