@@ -10,13 +10,16 @@ jobs:
   preprocess:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write  # agar GITHUB_TOKEN bisa push
+
     steps:
       # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Set up Python
-      - name: Set up Python
+      # 2️⃣ Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
@@ -27,28 +30,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas scikit-learn
 
-      # 4️⃣ Run preprocessing
+      # 4️⃣ Jalankan preprocessing
       - name: Run preprocessing
         run: |
-          python preprocessing/automate_maxwell-massie.py
+          python preprocessing/automate_Nama-siswa.py
 
-      # 5️⃣ Commit & push hasil preprocessing menggunakan PAT
-      - name: Commit and push preprocessed dataset
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      # 5️⃣ Commit & push hasil preprocessing ke repo
+      - name: Commit and push preprocessed CSV
         run: |
           # Set author commit
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Set remote URL menggunakan PAT untuk push
-          git remote set-url origin https://x-access-token:${PAT_TOKEN}@github.com/maxwellmassie/Eksperimen_SML_Maxwell-Massie.git
-
-          # Tambahkan file preprocessing
+          # Tambahkan file CSV preprocessing
           git add preprocessing/auto-mpg_preprocessed.csv
 
           # Commit jika ada perubahan
-          git diff-index --quiet HEAD || git commit -m "Update auto-mpg_preprocessed.csv"
+          git commit -m "Update auto-mpg_preprocessed.csv" || echo "No changes to commit"
 
-          # Push ke branch main
-          git push origin main
+          # Push menggunakan GITHUB_TOKEN
+          git push https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+
+      # 6️⃣ Upload hasil preprocessing sebagai artifact (opsional)
+      - name: Upload preprocessed CSV as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: auto-mpg_preprocessed
+          path: preprocessing/auto-mpg_preprocessed.csv
