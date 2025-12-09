@@ -42,6 +42,6 @@ def preprocess_car_dataset(input_path, output_path):
 
 
 if __name__ == "__main__":
-    input_file = "../auto-mpg.csv"
+    input_file = "auto-mpg.csv"
     output_file = "preprocessing/auto-mpg_preprocessed.csv"
     preprocess_car_dataset(input_file, output_file)
